@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YOLOv8 Object Detection</title>
+    <style>
+      body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            display: block;
+            border: 1px solid black;
+            margin-top: 10px;
+        }
+        #sideText {
+            margin-top: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status"></div>
+    <div id="items"></div>
+    <input id="uploadInput" type="file"/>
+    <canvas></canvas>
+    <script>
+      /**
+       * "Upload" button onClick handler: uploads selected image file
+       * to backend, receives array of detected objects
+       * and draws them on top of image
+       */
+       const input = document.getElementById("uploadInput");
+       input.addEventListener("change",async(event) => {
+           const data = new FormData();
+           data.append("image_file",event.target.files[0],"image_file");
+           const response = await fetch("/detect",{
+               method:"post",
+               body:data
+           });
+           const boxes = await response.json();
+           draw_image_and_boxes(event.target.files[0],boxes);
+       })
+
+      /**
+       * Function draws the image from provided file
+       * and bounding boxes of detected objects on
+       * top of the image
+       * @param file Uploaded file object
+       * @param boxes Array of bounding boxes in format [[x1,y1,x2,y2,object_type,probability],...]
+       */
+       function draw_image_and_boxes(file, boxes) {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+            const canvas = document.querySelector("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            ctx.strokeStyle = "#00FF00";
+            ctx.lineWidth = 3;
+            ctx.font = "18px serif";
+
+            const prohibitedItems = {};
+
+            boxes.forEach(([x1, y1, x2, y2, label]) => {
+                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                ctx.fillStyle = "#00ff00";
+                const width = ctx.measureText(label).width;
+                ctx.fillRect(x1, y1, width + 10, 25);
+                ctx.fillStyle = "#000000";
+                ctx.fillText(label, x1, y1 + 18);
+
+                if (label !== "bag") {
+                    if (prohibitedItems[label]) {
+                        prohibitedItems[label]++;
+                    } else {
+                        prohibitedItems[label] = 1;
+                    }
+                }
+            });
+
+            const sideTextElement = document.createElement("div");
+            sideTextElement.id = "sideText";
+            sideTextElement.style.marginLeft = "10px";
+            document.body.appendChild(sideTextElement);
+
+            let sideText = "This bag is: ";
+            sideText += boxes.some(([x1, y1, x2, y2, label]) => label === "bag")? "allowed" : "not allowed";
+            sideText += "<br><br>Prohibited item(s):<br>";
+
+            Object.entries(prohibitedItems).forEach(([label, count]) => {
+                sideText += `Item name: ${label}, Number of times it appears: ${count}<br>`;
+            });
+
+            sideTextElement.innerHTML = sideText;
+        };
+    }
+    </script>
+</body>
+</html>
