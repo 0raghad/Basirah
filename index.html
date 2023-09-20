@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>YOLOv8 Object Detection</title>
+    <title>Basireh</title>
     <style>
       body {
             display: flex;
@@ -10,7 +10,15 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
+            background: linear-gradient(180deg, #FFF491 -7.54%, rgba(255, 195, 162, 0.494792) 49.78%, rgba(248, 231, 174, 0) 100%);
+
         }
+        h1{
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+                    }
         #container {
             display: flex;
             flex-direction: column;
@@ -23,11 +31,12 @@
         }
         #sideText {
             margin-top: 10px;
-            font-size: 20px;
+            font-size: 30px;
         }
     </style>
 </head>
 <body>
+    <h1>Basirah - Automated Baggage Scanner</h1>
     <div id="status"></div>
     <div id="items"></div>
     <input id="uploadInput" type="file"/>
@@ -39,6 +48,7 @@
        * and draws them on top of image
        */
        // List of prohibited labels
+       
        const prohibitedLabels = [
           'Handcuffs',
           'knife',
@@ -88,6 +98,10 @@
             canvas.width = img.width;
             canvas.height = img.height;
             const ctx = canvas.getContext("2d");
+            
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
             ctx.drawImage(img, 0, 0);
             ctx.strokeStyle = "#00FF00";
             ctx.lineWidth = 3;
@@ -112,10 +126,18 @@
                 }
             });
 
-            const sideTextElement = document.createElement("div");
-            sideTextElement.id = "sideText";
-            sideTextElement.style.marginLeft = "10px";
-            document.body.appendChild(sideTextElement);
+            // Remove previous sideTextElement if it exists
+            const sideTextElement = document.getElementById("sideText");
+            if (sideTextElement) {
+                sideTextElement.remove();
+            }
+
+            // Create a new sideTextElement
+            const newSideTextElement = document.createElement("div");
+            newSideTextElement.id = "sideText";
+            newSideTextElement.style.marginLeft = "10px";
+            document.body.appendChild(newSideTextElement);
+
             let sideText = "This bag is: ";
             sideText += boxes.some(([x1, y1, x2, y2, label]) => prohibitedLabels.includes(label))? "not allowed": "allowed";
             sideText += "<br><br>Prohibited item(s):<br>";
@@ -123,8 +145,8 @@
             Object.entries(prohibitedItems).forEach(([label, count]) => {
                 sideText += `Item name: ${label}, Number of times it appears: ${count}<br>`;
             });
-        
-            sideTextElement.innerHTML = sideText;
+
+            newSideTextElement.innerHTML = sideText;
         };
     }
     </script>
