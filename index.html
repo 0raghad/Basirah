@@ -38,6 +38,29 @@
        * to backend, receives array of detected objects
        * and draws them on top of image
        */
+       // List of prohibited labels
+       const prohibitedLabels = [
+          'Handcuffs',
+          'knife',
+          'lighter',
+          'power bank',
+          'pressure',
+          'scissors',
+          'zippo oil',
+          'USB Flash Disk',
+          'battery',
+          'knife',
+          'lighter',
+          'plastic Bottle',
+          'pressure',
+          'scissors',
+          'seal',
+          'Gun',
+          'Knife',
+          'Pliers',
+          'Scissors',
+          'Wrench'
+        ];
        const input = document.getElementById("uploadInput");
        input.addEventListener("change",async(event) => {
            const data = new FormData();
@@ -93,15 +116,14 @@
             sideTextElement.id = "sideText";
             sideTextElement.style.marginLeft = "10px";
             document.body.appendChild(sideTextElement);
-
             let sideText = "This bag is: ";
-            sideText += boxes.some(([x1, y1, x2, y2, label]) => label === "bag")? "allowed" : "not allowed";
+            sideText += boxes.some(([x1, y1, x2, y2, label]) => prohibitedLabels.includes(label))? "not allowed": "allowed";
             sideText += "<br><br>Prohibited item(s):<br>";
 
             Object.entries(prohibitedItems).forEach(([label, count]) => {
                 sideText += `Item name: ${label}, Number of times it appears: ${count}<br>`;
             });
-
+        
             sideTextElement.innerHTML = sideText;
         };
     }
