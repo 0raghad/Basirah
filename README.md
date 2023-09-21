@@ -22,7 +22,7 @@ Install dependencies by running `pip3 install -r requirements.txt`
 # Run
 `python API.py`
 
-This will start a web server on `http://localhost:8080`.
+This will start a web server on `http://localhost:8080`
 
 The web interface allows users to upload an image. The image will be passed through the object detection model to identify any prohibited items. Bounding boxes will be drawn around each detected object along with the label.
 
